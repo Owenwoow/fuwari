@@ -14,4 +14,4 @@ export const BANNER_HEIGHT_HOME = BANNER_HEIGHT + BANNER_HEIGHT_EXTEND;
 export const MAIN_PANEL_OVERLAPS_BANNER_HEIGHT = 3.5;
 
 // 页面宽度：rem - 从75增加到90，提升大屏幕视觉利用率
-export const PAGE_WIDTH = 90;
+export const PAGE_WIDTH = 75;
