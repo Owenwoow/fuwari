@@ -1,0 +1,129 @@
+---
+import { Icon } from "astro-icon/components";
+import I18nKey from "../../i18n/i18nKey";
+import { i18n } from "../../i18n/translation";
+
+interface Props {
+	id: string;
+	name?: string;
+	isCollapsed?: boolean;
+	collapsedHeight?: string;
+	class?: string;
+	style?: string;
+}
+const { id, name, isCollapsed, collapsedHeight, style } = Astro.props;
+const className = Astro.props.class;
+---
+<widget-layout data-id={id} data-is-collapsed={String(isCollapsed)} class={"pb-4 card-base " + className} style={style}>
+    <div class="font-bold transition text-lg text-neutral-900 dark:text-neutral-100 relative ml-8 mt-4 mb-2
+        before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
+        before:absolute before:left-[-16px] before:top-[5.5px]">{name}</div>
+    <div id={id} class:list={["collapse-wrapper px-4", {"collapsed": isCollapsed}]}>
+        <slot></slot>
+    </div>
+    <div class="button-section">
+        {isCollapsed && <div class="expand-btn px-4">
+            <button class="btn-plain rounded-lg w-full h-9 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                <div class="text-[var(--primary)] flex items-center justify-center gap-2 -translate-x-2">
+                    <Icon name="material-symbols:more-horiz" class="text-[1.75rem] transition-transform duration-200"></Icon> {i18n(I18nKey.more)}
+                </div>
+            </button>
+        </div>}
+        <div class="collapse-btn px-4 hidden">
+            <button class="btn-plain rounded-lg w-full h-9 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                <div class="text-[var(--primary)] flex items-center justify-center gap-2 -translate-x-2">
+                    <Icon name="material-symbols:expand-less" class="text-[1.75rem] transition-transform duration-200"></Icon> {i18n(I18nKey.less)}
+                </div>
+            </button>
+        </div>
+    </div>
+</widget-layout>
+
+<style define:vars={{ collapsedHeight }}>
+    .collapse-wrapper {
+        transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+    
+    .collapsed {
+        height: var(--collapsedHeight);
+    }
+    
+    .expand-btn, .collapse-btn {
+        transition: all 0.15s ease-out;
+    }
+    
+    .expand-btn.hidden, .collapse-btn.hidden {
+        opacity: 0;
+        transform: translateY(-4px);
+        pointer-events: none;
+    }
+    
+    .expand-btn:not(.hidden), .collapse-btn:not(.hidden) {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    /* 按照布局图实现的间距 */
+    .collapse-wrapper {
+        padding-top: 0.5rem;    /* 内容顶部间距 */
+        /* padding-bottom: 0.75rem; 内容底部间距 */
+    }
+    
+    .button-section {
+        margin-top: 0.5rem;     /* 按钮顶部间距 */
+        /* padding-top: 0.5rem;     按钮内边距 */
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .dark .button-section {
+        border-top-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    /* 内容淡入淡出效果 */
+    .collapse-wrapper > * {
+        transition: opacity 0.2s ease-in-out;
+    }
+    
+    .collapsed .collapse-wrapper > *:nth-child(n+4) {
+        opacity: 0.3;
+    }
+</style>
+
+<script>
+    class WidgetLayout extends HTMLElement {
+        constructor() {
+            super();
+
+            if (this.dataset.isCollapsed !== "true")
+                return;
+
+            const id = this.dataset.id;
+            const expandBtn = this.querySelector('.expand-btn');
+            const collapseBtn = this.querySelector('.collapse-btn');
+            const wrapper = this.querySelector(`#${id}`);
+            
+            expandBtn!.addEventListener('click', () => {
+                // 立即切换按钮状态
+                expandBtn!.classList.add('hidden');
+                collapseBtn!.classList.remove('hidden');
+                
+                // 平滑展开动画
+                wrapper!.classList.remove('collapsed');
+            });
+            
+            collapseBtn!.addEventListener('click', () => {
+                // 立即切换按钮状态
+                collapseBtn!.classList.add('hidden');
+                expandBtn!.classList.remove('hidden');
+                
+                // 平滑收起动画
+                wrapper!.classList.add('collapsed');
+            });
+        }
+    }
+
+    if (!customElements.get("widget-layout")) {
+        customElements.define("widget-layout", WidgetLayout);
+    }
+</script>
